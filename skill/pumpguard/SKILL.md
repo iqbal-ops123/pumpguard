@@ -5,7 +5,7 @@ description: Check whether a crypto coin on Binance futures shows signs of a lev
 
 # PumpGuard
 
-PumpGuard scores how fragile a Binance USDT perpetual futures market looks, from 0 to 100, and labels which stage of the pump-and-dump pattern it seems to be in. It uses live public Binance data. No API key and no installs are needed.
+PumpGuard scores how fragile a Binance USDT perpetual futures market looks, from 0 to 100, and labels which stage of the pump-and-dump pattern it seems to be in. It uses live public Binance data, and for named coins it also checks who holds the coin on the blockchain (CoinGecko, GoPlus and TonAPI, all free). No API key and no installs are needed.
 
 Source and documentation: https://github.com/iqbal-ops123/pumpguard
 
@@ -23,6 +23,8 @@ python3 <this skill's folder>/scan.py --json --top 10     # whole market, about 
 
 - Pass coin tickers as the user wrote them (e.g. `PEPE`, `rave`). The scanner finds names like `1000PEPEUSDT` on its own. If a coin is "Not found on Binance futures", say so.
 - For a whole-market scan, tell the user it takes about a minute and a half.
+- Checking named coins includes the holder check, which can take up to a minute because the free data sources limit how fast we can ask. Add `--no-holders` only if the user wants a quick answer.
+- `scan.py` imports `holders.py` from the same folder, so keep both files together.
 - Binance blocks some countries and some cloud servers. If the scanner says Binance refused the request or could not be reached, tell the user plainly: PumpGuard has to run on a computer whose location Binance allows (for example through Claude Code or the Claude desktop app on their own computer). Never make up numbers.
 
 ## Explaining the result
@@ -43,7 +45,12 @@ Write for someone who is not a trader: plain, simple words, no jargon. For each 
    - **Possible distribution**: borrowed money is leaving after a pump; a drop may be starting.
    - **Post-dump**: a crash has probably already happened.
    - **Fragile / Watch / Quiet**: from more to less concern.
-4. If a coin crashed long ago it can look "Quiet" now, because the scanner only looks at the last 24 hours. Say so when relevant.
+4. **Who holds the coin** (from the `holders` part of the result, when present):
+   - For each blockchain in `holders.chains`, give the number of wallets, what share the top 10 hold, and the biggest holders with their labels. The `is_main_chain` one matters most.
+   - Shares are of the coins on that one blockchain, not of the whole coin's supply. Say so.
+   - Labels like "Binance (exchange)", bridges and pools usually hold coins for many users, so they are not counted as insiders. An unlabeled "wallet" is unknown: it could be the team, an investor, a fund or an exchange we have not labeled yet. Do not claim it belongs to anyone.
+   - Mention any contract risks listed in `risks` (for example a honeypot or an owner who can change balances), and any `notes`.
+5. If a coin crashed long ago it can look "Quiet" now, because the scanner only looks at the last 24 hours. Say so when relevant.
 
 ## Rules
 
@@ -51,4 +58,4 @@ Write for someone who is not a trader: plain, simple words, no jargon. For each 
 - A high score means the market looks fragile based on public data. Never call a project a scam or say anyone committed fraud.
 - Scores use early (v0.1) thresholds that have not yet been tested against past crashes. Mention this when the user seems about to rely on a score.
 - Report only the numbers the scanner returned. Do not fill gaps from memory.
-- The scanner only sees Binance futures data. It does not see who holds the coins or wallet movements.
+- The scanner sees Binance futures data and the current top holders. It does not yet track wallet movements, such as big holders sending coins to exchanges.

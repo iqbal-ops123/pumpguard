@@ -1,16 +1,26 @@
 # PumpGuard
 
-A free Claude skill and scanner that flags crypto coins showing signs of a leverage-driven pump-and-dump setup on Binance futures.
+**Spot pump-and-dump setups before you become the exit liquidity.**
 
-Ask Claude "check PEPE" or "what looks fragile on Binance right now?" and get a score from 0 to 100, the stage the coin seems to be in, and the reasons in plain English.
+A free, open-source Claude skill and scanner. Ask Claude "check EVAA" and get a score from 0 to 100, the stage of the pump-and-dump pattern the coin seems to be in, who holds it, and whether big wallets are sending coins to exchanges, all in plain English.
+
+![PumpGuard checking EVAA](docs/demo-evaa.svg)
+
+*A real check from 16 Nov 2026. Research only, not financial advice.*
+
+**Quick start** (Python 3.8+, no installs, no API keys):
 
 ```
-EVAA  score 49/100  [Pumping]
-- Bets on this coin are worth 88% of the coin's whole value (extreme)
-- No regular spot market on Binance, so futures alone set the price
-- Buyers using borrowed money are crowded and paying to stay in
-- Price up 63% in 24 hours
+git clone https://github.com/iqbal-ops123/pumpguard.git
+python3 pumpguard/skill/pumpguard/scan.py EVAA
 ```
+
+**What it checks**
+
+- **Borrowed money:** how big the bets on a coin are compared with the coin itself, futures vs. normal trading, and who is crowded (buyers or short-sellers)
+- **Who holds it:** the biggest wallets on each blockchain, with exchanges, bridges and pools labeled
+- **Big wallets moving to exchanges:** coins sent to exchanges in the last 24 hours and 7 days (TON and Ethereum so far)
+- **Contract traps:** honeypots, owners who can change balances, high sell taxes
 
 ## Use it as a Claude skill
 
@@ -68,11 +78,13 @@ PumpGuard does not predict prices. It scores how fragile a market looks and expl
 
 ## What it looks at
 
-Live Binance futures data: open interest compared with market cap, futures volume compared with spot volume, funding rates, how fast open interest is changing, the 24-hour price move, and whether big accounts and most accounts are betting opposite ways.
+- **Live Binance futures data:** open interest compared with market cap, futures volume compared with spot volume, funding rates, how fast open interest is changing, the 24-hour price move, and whether big accounts and most accounts are betting opposite ways.
+- **Blockchain holders** (CoinGecko, GoPlus, TonAPI, Blockscout): top wallets on each chain, wallet types, and contract risks.
+- **Wallet movements:** whether the biggest unknown wallets sent coins to labeled exchange wallets recently.
 
 ## Status and limits
 
-Version 0.1. The score thresholds are starting points that have not yet been tested against past crashes. The scanner only sees Binance futures data from the last 24 hours. It does not see who holds the coins or wallet movements. Coming next: a library of past cases (OM, MYX, COAI, JELLYJELLY, RAVE and others) to test and tune the scores.
+Version 0.1. The score thresholds are starting points that have not yet been tested against past crashes. Futures data covers the last 24 hours. Holder shares are of the coins on one blockchain, not the whole supply. Wallet movement tracking covers TON and Ethereum so far, only recognizes labeled exchange wallets, and cannot yet follow coins through middle wallets. Coming next: a library of past cases (OM, MYX, COAI, JELLYJELLY, RAVE and others) to test and tune the scores.
 
 ## Disclaimer
 

@@ -12,7 +12,8 @@ Usage:
   python scan.py --json RAVE     # machine-readable output
   python scan.py --no-holders X  # skip the (slower) holder check
 
-When you name coins, PumpGuard also checks who holds them on the blockchain.
+When you name coins, PumpGuard also checks who holds them on the blockchain and
+whether the biggest wallets have been sending coins to exchanges.
 
 No installs needed: uses only Python's standard library (Python 3.8+).
 
@@ -33,6 +34,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import holders  # noqa: E402  (holder check lives next to this file)
+import flows  # noqa: E402  (wallet movement check)
 
 FAPI = "https://fapi.binance.com"
 SPOT = "https://api.binance.com"
@@ -242,8 +244,10 @@ def add_holders(row):
     digits = len(symbol) - len(symbol.lstrip("0123456789"))
     if digits >= 4 and symbol[:digits].strip("0") == "1":
         symbol, price = symbol[digits:], (price / int(symbol[:digits]) if price else None)
-    rep = holders.check(symbol, price)
+    rep = flows.enrich(holders.check(symbol, price))
     pts, reasons = holders.score_holders(rep)
+    fpts, freasons = flows.score_flows(rep)
+    pts, reasons = pts + fpts, reasons + freasons
     row["holders"] = rep
     row["score"] = min(row["score"] + pts, 100)
     row["reasons"] += reasons
@@ -260,6 +264,12 @@ def print_holders(rep):
             label = h["label"] or ("contract" if h["is_contract"] else "wallet")
             pct = f"{h['percent'] * 100:.1f}%" if h["percent"] is not None else "?"
             print(f"     {pct:>6}  {label}  {str(h['address'])[:12]}...")
+        if "exchange_moves" in c:
+            if not c["exchange_moves"]:
+                print(f"     Big wallets checked: {c['wallets_followed']}. None sent coins to exchanges in the last 7 days.")
+            for m in c["exchange_moves"]:
+                print(f"     Wallet {str(m['wallet'])[:12]}... sent {(m['to_exchanges_24h_share'] or 0) * 100:.2f}% (24h) and "
+                      f"{(m['to_exchanges_7d_share'] or 0) * 100:.2f}% (7 days) of the coins here to: {', '.join(m['destinations'])}")
     for n in rep.get("notes", []):
         print(f"   Note: {n}")
 

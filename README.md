@@ -1,28 +1,72 @@
 # PumpGuard
 
-An open-source scanner that flags crypto tokens showing signs of a leverage-driven pump-and-dump setup.
+A free Claude skill and scanner that flags crypto coins showing signs of a leverage-driven pump-and-dump setup on Binance futures.
+
+Ask Claude "check PEPE" or "what looks fragile on Binance right now?" and get a score from 0 to 100, the stage the coin seems to be in, and the reasons in plain English.
+
+```
+EVAA  score 49/100  [Pumping]
+- Bets on this coin are worth 88% of the coin's whole value (extreme)
+- No regular spot market on Binance, so futures alone set the price
+- Buyers using borrowed money are crowded and paying to stay in
+- Price up 63% in 24 hours
+```
+
+## Use it as a Claude skill
+
+You need Python 3.8 or newer. Nothing else to install, and no API key.
+
+**Claude Code**
+
+```
+git clone https://github.com/iqbal-ops123/pumpguard.git
+mkdir -p ~/.claude/skills
+cp -r pumpguard/skill/pumpguard ~/.claude/skills/
+```
+
+Then open Claude Code and type: `check BTC`
+
+**Claude app (claude.ai or desktop)**
+
+1. Download this repo (green "Code" button, then "Download ZIP") and unzip it.
+2. Find the folder `skill/pumpguard` and zip that folder on its own.
+3. Upload the zip as a new skill in Claude's skills settings.
+4. Ask Claude: `check BTC`
+
+Note: Binance blocks some countries and some cloud servers. The skill needs to run somewhere Binance allows. If Claude says Binance refused the request, use Claude Code on your own computer instead.
+
+## Use it without Claude
+
+```
+python3 skill/pumpguard/scan.py            # 10 most fragile coins right now
+python3 skill/pumpguard/scan.py PEPE RAVE  # check specific coins
+python3 skill/pumpguard/scan.py --json BTC # raw numbers
+```
+
+## What the stages mean
+
+| Stage | Meaning |
+|---|---|
+| Squeeze setup | Many people are betting on a fall in a fragile market. A squeeze can push the price up first. |
+| Squeeze in progress | The price is being pushed up while people bet on a fall. Shorting now is risky. |
+| Pumping | Rising fast on borrowed money. Late buyers are at risk. |
+| Possible distribution | Borrowed money is leaving after a pump. A drop may be starting. |
+| Post-dump | A crash has probably already happened. |
+| Fragile / Watch / Quiet | From more to less concern. |
 
 ## Why
 
-Many tokens on exchanges like Binance and Bitget pump hard for no clear reason, then crash 80 to 99%. Most of these moves follow the same pattern: a small real float held by a few wallets, a perpetual futures market, crowded shorts, a forced short squeeze, and then insiders selling into the squeeze. Retail traders end up as the exit liquidity, whether they bought the top or shorted too early.
+Many coins on exchanges like Binance and Bitget pump hard for no clear reason, then crash 80 to 99%. Most of these moves follow the same pattern: a small real float held by a few wallets, a perpetual futures market, crowded shorts, a forced short squeeze, and then insiders selling into the squeeze. Retail traders end up as the exit liquidity, whether they bought the top or shorted too early.
 
-PumpGuard does not predict prices. It scores how fragile a token's market looks and which stage of this pattern it seems to be in, and it explains every flag in plain words so you can check the evidence yourself.
+PumpGuard does not predict prices. It scores how fragile a market looks and explains every flag so you can check the evidence yourself.
 
 ## What it looks at
 
-Leverage pressure: open interest vs market cap, futures vs spot volume, funding rates, long/short ratios, liquidation levels.
+Live Binance futures data: open interest compared with market cap, futures volume compared with spot volume, funding rates, how fast open interest is changing, the 24-hour price move, and whether big accounts and most accounts are betting opposite ways.
 
-Supply control: top holder concentration, real circulating float, upcoming token unlocks, contract risks.
+## Status and limits
 
-Wallet behaviour: insider transfers to exchanges and clusters of wallets that act together.
-
-Market quality: volume vs order book depth, price gaps between exchanges, signs of wash trading.
-
-Price shape and context: size and speed of the move, lack of news, exchange risk tags, and similarity to past cases.
-
-## Status
-
-Early stage. First step: collect hourly derivatives data for all Binance perpetual futures and build a library of past cases (OM, MYX, COAI, JELLYJELLY, RAVE and others) to test against.
+Version 0.1. The score thresholds are starting points that have not yet been tested against past crashes. The scanner only sees Binance futures data from the last 24 hours. It does not see who holds the coins or wallet movements. Coming next: a library of past cases (OM, MYX, COAI, JELLYJELLY, RAVE and others) to test and tune the scores.
 
 ## Disclaimer
 

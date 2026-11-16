@@ -16,6 +16,10 @@ EVAA  score 49/100  [Pumping]
 
 You need Python 3.8 or newer. Nothing else to install, and no API key.
 
+- **Mac:** Python is usually already installed. Check by typing `python3 --version` in Terminal.
+- **Windows:** install Python from [python.org](https://www.python.org/downloads/) and tick "Add python.exe to PATH" during setup. On Windows, type `python` or `py` wherever this page says `python3`.
+- **Linux:** Python 3 is usually already installed.
+
 **Claude Code**
 
 ```
@@ -42,6 +46,8 @@ python3 skill/pumpguard/scan.py            # 10 most fragile coins right now
 python3 skill/pumpguard/scan.py PEPE RAVE  # check specific coins
 python3 skill/pumpguard/scan.py --json BTC # raw numbers
 ```
+
+On Windows, use `py` instead of `python3`, for example `py skill\pumpguard\scan.py PEPE`.
 
 ## What the stages mean
 

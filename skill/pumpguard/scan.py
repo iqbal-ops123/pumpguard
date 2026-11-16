@@ -10,6 +10,9 @@ Usage:
   python scan.py --top 20        # top 20
   python scan.py RAVE MYX        # check specific coins
   python scan.py --json RAVE     # machine-readable output
+  python scan.py --no-holders X  # skip the (slower) holder check
+
+When you name coins, PumpGuard also checks who holds them on the blockchain.
 
 No installs needed: uses only Python's standard library (Python 3.8+).
 
@@ -26,6 +29,10 @@ import time
 import urllib.error
 import urllib.parse
 import urllib.request
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import holders  # noqa: E402  (holder check lives next to this file)
 
 FAPI = "https://fapi.binance.com"
 SPOT = "https://api.binance.com"
@@ -228,6 +235,35 @@ def resolve(names, perps):
     return out
 
 
+def add_holders(row):
+    """Adds the blockchain holder check to a scored row."""
+    symbol, price = row["base"], row.get("price")
+    # Binance lists some cheap coins per 1,000 units, e.g. 1000PEPE. Use the real ticker and unit price.
+    digits = len(symbol) - len(symbol.lstrip("0123456789"))
+    if digits >= 4 and symbol[:digits].strip("0") == "1":
+        symbol, price = symbol[digits:], (price / int(symbol[:digits]) if price else None)
+    rep = holders.check(symbol, price)
+    pts, reasons = holders.score_holders(rep)
+    row["holders"] = rep
+    row["score"] = min(row["score"] + pts, 100)
+    row["reasons"] += reasons
+    row["stage"] = stage(row)
+    return row
+
+
+def print_holders(rep):
+    for c in rep.get("chains", []):
+        main = " (main chain)" if c.get("is_main_chain") else ""
+        print(f"   Holders on {c['chain']}{main}: {c.get('holder_count') or '?'} wallets, "
+              f"top 10 hold {c['top10_percent'] * 100:.0f}% of the coins on this chain")
+        for h in c["top_holders"][:5]:
+            label = h["label"] or ("contract" if h["is_contract"] else "wallet")
+            pct = f"{h['percent'] * 100:.1f}%" if h["percent"] is not None else "?"
+            print(f"     {pct:>6}  {label}  {str(h['address'])[:12]}...")
+    for n in rep.get("notes", []):
+        print(f"   Note: {n}")
+
+
 def print_report(rows):
     print("PumpGuard v0.1  |  Binance USDT perpetuals  |  research only, not financial advice\n")
     for i, r in enumerate(rows, 1):
@@ -239,6 +275,8 @@ def print_report(rows):
         )
         for reason in r["reasons"] or ["Nothing unusual found"]:
             print(f"   - {reason}")
+        if r.get("holders"):
+            print_holders(r["holders"])
         print()
 
 
@@ -247,6 +285,7 @@ def main():
     ap.add_argument("coins", nargs="*", help="coins to check, e.g. RAVE MYX (default: scan the market)")
     ap.add_argument("--top", type=int, default=10)
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--no-holders", action="store_true", help="skip the blockchain holder check")
     a = ap.parse_args()
 
     perps, premium, fut, spot, finfo = load_market()
@@ -262,6 +301,8 @@ def main():
         symbols = [r["symbol"] for r in quick[:CANDIDATES]]
 
     rows = [score(deep_check(basic_row(s, perps, premium, fut, spot, finfo))) for s in symbols]
+    if a.coins and not a.no_holders:
+        rows = [add_holders(r) for r in rows]
     rows.sort(key=lambda r: r["score"], reverse=True)
     if not a.coins:
         rows = rows[: a.top]

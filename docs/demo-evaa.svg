@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="448" viewBox="0 0 880 448" role="img" aria-label="PumpGuard check of EVAA, 16 Nov 2026">
+<rect width="880" height="448" rx="10" fill="#0d1117"/>
+<rect width="880" height="34" rx="10" fill="#161b22"/><rect y="24" width="880" height="10" fill="#161b22"/>
+<circle cx="22" cy="17" r="6" fill="#ff5f56"/><circle cx="42" cy="17" r="6" fill="#ffbd2e"/><circle cx="62" cy="17" r="6" fill="#27c93f"/>
+<text x="440" y="22" fill="#8b949e" font-family="Menlo,Consolas,monospace" font-size="13" text-anchor="middle">PumpGuard: live check, 16 Nov 2026</text>
+<g font-family="Menlo,Consolas,monospace" font-size="13.5" xml:space="preserve">
+<text x="24" y="54" fill="#8b949e">$ python3 scan.py EVAA</text>
+<text x="24" y="76" fill="#8b949e">PumpGuard v0.1  |  Binance USDT perpetuals  |  research only, not financial advice</text>
+<text x="24" y="120" fill="#f0883e">1. EVAA  score 49/100  [Pumping]</text>
+<text x="24" y="142" fill="#c9d1d9">   price 3.29442  24h +25.9%  funding/8h 0.136%  OI/mcap 91.7%  fut/spot: no spot</text>
+<text x="24" y="164" fill="#ff7b72">   - Open interest is 92% of market cap (extreme; top-100 coins are usually under 20%)</text>
+<text x="24" y="186" fill="#ff7b72">   - No spot market on Binance to compare with, so futures may be driving the price</text>
+<text x="24" y="208" fill="#ff7b72">   - Funding 0.136% per 8h: longs are crowded</text>
+<text x="24" y="230" fill="#ff7b72">   - Price up 26% in 24h</text>
+<text x="24" y="252" fill="#ff7b72">   - One unlabeled wallet on TON holds 28% of the coins there</text>
+<text x="24" y="296" fill="#79c0ff">   Holders on TON (main chain): 2721 wallets, top 10 hold 86% of the coins on this chain</text>
+<text x="24" y="318" fill="#c9d1d9">      30.4%  high-volume wallet, usually an exchange or service</text>
+<text x="24" y="340" fill="#c9d1d9">      27.5%  multisig wallet, often a team or treasury</text>
+<text x="24" y="362" fill="#c9d1d9">      12.5%  multisig wallet, often a team or treasury</text>
+<text x="24" y="384" fill="#c9d1d9">       4.6%  Symbiosis Bridge</text>
+<text x="24" y="406" fill="#7ee787">   Big wallets checked: 5. None sent coins to exchanges in the last 7 days.</text>
+</g>
+</svg>
